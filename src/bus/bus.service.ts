@@ -1,9 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { RandomUtils } from 'utils/random.util';
-import { StringUtils } from 'utils/string.util';
 import { BusIds } from './bus.constants';
-import { BusFindResponse } from './bus.response.dto';
 
 @Injectable()
 export class BusService {
@@ -21,36 +19,38 @@ export class BusService {
         throw new BadRequestException(response.data.msgHeader.headerMsg);
       }
       const data = response.data.msgBody.itemList;
-      const exp = /곧 도착|^1분|^2분|^3분|^4분/;
+
       let busData = [];
       data.forEach((item) => {
-        if (exp.test(item.arrmsg1) && exp.test(item.arrmsg2)) {
-          const sort1 = StringUtils.makeSortString(item.arrmsg1);
-          const sort2 = StringUtils.makeSortString(item.arrmsg2);
+        if (
+          Number(item.traTime1) > 0 &&
+          Number(item.traTime1) < 300 &&
+          Number(item.traTime2) > 0 &&
+          Number(item.traTime2) < 300
+        ) {
           busData.push([
             {
               busNumber: item.rtNm,
               plateNumber: item.plainNo1,
-              eta: item.arrmsg1,
-              sort: sort1,
+              eta: Number(item.traTime1),
+              msg: item.arrmsg1,
             },
             {
               busNumber: item.rtNm,
               plateNumber: item.plainNo2,
-              eta: item.arrmsg2,
-              sort: sort2,
+              eta: Number(item.traTime2),
+              mag: item.arrmsg2,
             },
           ]);
         }
         if (busData.length !== 6) {
-          if (exp.test(item.arrmsg1)) {
-            const sort = StringUtils.makeSortString(item.arrmsg1);
+          if (Number(item.traTime1) > 0 && Number(item.traTime1) < 300) {
             busData.push([
               {
                 busNumber: item.rtNm,
                 plateNumber: item.plainNo1,
-                eta: item.arrmsg1,
-                sort,
+                eta: Number(item.traTime1),
+                msg: item.arrmsg1,
               },
             ]);
           }
@@ -59,8 +59,8 @@ export class BusService {
       busInfo.push(...busData.slice(0, 6));
       busData = [];
     }
-    const flatBusInfo = busInfo.flat().sort((a, b) => a.sort - b.sort);
+    const flatBusInfo = busInfo.flat().sort((a, b) => a.eta - b.eta);
 
-    return flatBusInfo.map((item) => BusFindResponse.of(item));
+    return flatBusInfo;
   }
 }
