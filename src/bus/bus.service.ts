@@ -42,7 +42,7 @@ export class BusService {
             },
           ]);
         }
-        if (busData.length !== 3) {
+        if (busData.length !== 6) {
           if (exp.test(item.arrmsg1)) {
             const sort = StringUtils.makeSortString(item.arrmsg1);
             busData.push([
@@ -56,7 +56,7 @@ export class BusService {
           }
         }
       });
-      busInfo.push(...busData.slice(0, 3));
+      busInfo.push(...busData.slice(0, 6));
       busData = [];
     }
     const flatBusInfo = busInfo.flat().sort((a, b) => a.sort - b.sort);
