@@ -14,7 +14,6 @@ export class StringUtils {
     if (sortString.length === 2) {
       sortString = [sortString.slice(0, 1), '0', sortString.slice(1)].join('');
     }
-    console.log(sortString);
     return Number(sortString);
   }
 }
